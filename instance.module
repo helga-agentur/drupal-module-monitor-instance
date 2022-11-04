@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * When cron is run, send all data to our monitoring.
+ *
+ * @return void
+ * @throws \GuzzleHttp\Exception\GuzzleException
+ */
+function instance_cron() {
+  //ignore all local development environments - just in case
+  if(preg_match('/^local\..*|.*\.local$|.*\.local\..*/', \Drupal::request()->getHost())) return;
+
+  $data = [
+    'id' => \Drupal::request()->getSchemeAndHttpHost(),
+    'data' => [
+      'drupal' => [
+        'version' => \Drupal::VERSION,
+      ],
+      'php' => [
+        'version' => phpversion(),
+      ],
+      'git' => [
+        'head' => shell_exec('git status | head -n 1'),
+        'commit' => shell_exec('git rev-parse --short HEAD'),
+      ],
+      'timestamp' => time()
+    ]
+  ];
+
+  try {
+    $dataTransmitter = new \Drupal\instance\DataTransmitter();
+    $dataTransmitter->transmit($data);
+  } catch (Exception $e) {
+    \Drupal::logger('monitor')->error($e->getMessage());
+  }
+}
