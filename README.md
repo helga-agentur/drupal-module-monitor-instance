@@ -1,8 +1,12 @@
 # Monitor-Instance
-When enabled the instance sends data to the monitor. It uses the Drupal Cron hook to trigger the sending.
+The Joinbox Monitoring tool consists of the following two parts.
+- [Monitor](https://github.com/joinbox/d9-module-monitor)
+- [Instance](https://github.com/joinbox/d9-module-monitor-instance)
+
+When instance is enabled it sends data to the monitor as soon as the Drupal Cron hook is triggered.
 
 ## Activation
-As soon as you put the following lines in your settings.php file, monitoring functionality is enabled. The instance sends information to your monitor, each time the cron job is run.
+Add the following lines to your settings.php file to enable functionality.
 
 ```php
 $settings['instance'] = [
