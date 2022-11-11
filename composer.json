@@ -1,0 +1,14 @@
+{
+    "name": "joinbox/monitor-instance",
+    "description": "The instance sends data to the monitor.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "sandu",
+            "email": "sandro@joinbox.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
