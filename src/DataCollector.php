@@ -2,12 +2,30 @@
 
 namespace Drupal\instance;
 
-class DataCollector
-{
+use Drupal\Core\Site\Settings;
 
-  public function getData(): array
-  {
+class DataCollector {
+
+  protected string $project;
+
+  protected string $environment;
+
+  public function __construct() {
+    //get settings
+    $settings = Settings::get('instance');
+    $this->project = $settings['project'];
+    $this->environment = $settings['environment'];
+
+    //check for missing settings
+    if (!$this->project || $this->environment) {
+      throw new \Exception('Add an identifier and environment in your settings.php. Check README.md');
+    }
+  }
+
+  public function getData(): array {
     return [
+      'project' => $this->project,
+      'environment' => $this->environment,
       'host' => \Drupal::request()->getHost(),
       'data' => [
         'drupal' => [
