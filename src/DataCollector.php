@@ -22,6 +22,9 @@ class DataCollector
           'commit' => $this->getGitCommitId(),
           'commitUrl' => $this->getGitCommitUrl(),
         ],
+        'node' => [
+          'version' => $this->getNodeVersion(),
+        ],
         'timestamp' => time()
       ]
     ];
@@ -71,5 +74,9 @@ class DataCollector
 
   private function getPHPVersion(): string {
     return phpversion();
+  }
+
+  private function getNodeVersion(): string {
+    return shell_exec('node -v');
   }
 }
