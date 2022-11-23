@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\instance\DataCollector;
+use Drupal\instance\DataTransmitter;
 
 /**
  * When cron is run, send all data to our monitoring.
@@ -16,7 +17,7 @@ function instance_cron() {
   $data = $dataCollector->getData();
 
   try {
-    $dataTransmitter = new \Drupal\instance\DataTransmitter();
+    $dataTransmitter = new DataTransmitter();
     $dataTransmitter->transmit($data);
   } catch (Exception $e) {
     \Drupal::logger('monitor')->error($e->getMessage());
