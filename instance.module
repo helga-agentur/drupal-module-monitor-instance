@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\instance\DataCollector;
+
 /**
  * When cron is run, send all data to our monitoring.
  *
@@ -10,22 +12,8 @@ function instance_cron() {
   //ignore all local development environments - just in case
   if(preg_match('/^local\..*|.*\.local$|.*\.local\..*/', \Drupal::request()->getHost())) return;
 
-  $data = [
-    'id' => \Drupal::request()->getSchemeAndHttpHost(),
-    'data' => [
-      'drupal' => [
-        'version' => \Drupal::VERSION,
-      ],
-      'php' => [
-        'version' => phpversion(),
-      ],
-      'git' => [
-        'head' => shell_exec('git status | head -n 1'),
-        'commit' => shell_exec('git rev-parse --short HEAD'),
-      ],
-      'timestamp' => time()
-    ]
-  ];
+  $dataCollector = new DataCollector();
+  $data = $dataCollector->getData();
 
   try {
     $dataTransmitter = new \Drupal\instance\DataTransmitter();
