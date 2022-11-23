@@ -13,12 +13,10 @@ function instance_cron() {
   //ignore all local development environments - just in case
   if(preg_match('/^local\..*|.*\.local$|.*\.local\..*/', \Drupal::request()->getHost())) return;
 
-  $dataCollector = new DataCollector();
-  $data = $dataCollector->getData();
-
   try {
+    $dataCollector = new DataCollector();
     $dataTransmitter = new DataTransmitter();
-    $dataTransmitter->transmit($data);
+    $dataTransmitter->transmit($dataCollector->getData());
   } catch (Exception $e) {
     \Drupal::logger('monitor')->error($e->getMessage());
   }
