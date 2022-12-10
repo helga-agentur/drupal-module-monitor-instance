@@ -17,7 +17,7 @@ class DataCollector {
     $this->environment = $settings['environment'];
 
     //check for missing settings
-    if (!$this->project || $this->environment) {
+    if (!$this->project || !$this->environment) {
       throw new \Exception('Add an identifier and environment in your settings.php. Check README.md');
     }
   }
@@ -26,8 +26,8 @@ class DataCollector {
     return [
       'project' => $this->project,
       'environment' => $this->environment,
-      'host' => \Drupal::request()->getHost(),
       'data' => [
+        'host' => \Drupal::request()->getHost(),
         'drupal' => [
           'version' => $this->getDrupalCoreVersion(),
         ],
