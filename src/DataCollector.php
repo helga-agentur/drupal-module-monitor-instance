@@ -72,11 +72,11 @@ class DataCollector {
     return $this->getGitUrl() . '/commit/' . $this->getGitCommitId();
   }
 
-  private function getGitCommitId(): string {
+  private function getGitCommitId(): string|null {
     return shell_exec('git rev-parse --short HEAD');
   }
 
-  private function getGitCommitDate(): string {
+  private function getGitCommitDate(): string|null {
     return shell_exec('git show -s --format=%cd --date="format:%d.%m.%Y" ' . $this->getGitCommitId());
   }
 
