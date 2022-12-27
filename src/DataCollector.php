@@ -62,7 +62,7 @@ class DataCollector {
    */
   private function getGitHeadUrl(): string|null {
     //if head does not point to a version, return null
-    if(!preg_match('/^HEAD detached at (.+)$/', $this->getGitHead())) return null;
+    if(!preg_match('/HEAD detached at (.+)$/', $this->getGitHead())) return null;
 
     $tag = shell_exec('git describe --tags --abbrev=0');
     return $this->getGitUrl() . '/releases/tag/' . $tag;
@@ -76,8 +76,17 @@ class DataCollector {
     return shell_exec('git rev-parse --short HEAD');
   }
 
-  private function getGitCommitDate(): string|null {
-    return shell_exec('git show -s --format=%cd --date="format:%d.%m.%Y" ' . $this->getGitCommitId());
+  /**
+   * Returns the date of the commit id
+   *
+   * @TODO
+   * later we should change the format to a CH specific one,
+   * somehow the git command on the server does not run properly when passing a custom date format.
+   *
+   * @return string
+   */
+  private function getGitCommitDate(): string {
+    return shell_exec('git show -s --format=%cd --date=short ' . $this->getGitCommitId());
   }
 
   private function getGitUrl(): string|null {
