@@ -23,14 +23,15 @@ class DataTransmitter {
   public function __construct() {
     //get settings
     $settings = Settings::get('instance');
+
+    //check for missing settings
+    if (!isset($settings['monitor']) || !isset($settings['user']) || !isset($settings['password'])) {
+      throw new \Exception('Monitor Instance: Add a monitor, username and password in your settings.php. Check README.md');
+    }
+
     $this->monitor = $settings['monitor'];
     $this->user = $settings['user'];
     $this->password = $settings['password'];
-
-    //check for missing settings
-    if (!$this->monitor) {
-      throw new \Exception('Monitor is disabled. Enable it via settings.php. Check README.md');
-    }
 
     //create client
     $this->client = new Client([

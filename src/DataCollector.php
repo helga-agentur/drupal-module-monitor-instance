@@ -13,13 +13,14 @@ class DataCollector {
   public function __construct() {
     //get settings
     $settings = Settings::get('instance');
-    $this->project = $settings['project'];
-    $this->environment = $settings['environment'];
 
     //check for missing settings
-    if (!$this->project || !$this->environment) {
-      throw new \Exception('Add an identifier and environment in your settings.php. Check README.md');
+    if (!isset($settings['project']) || !isset($settings['environment'])) {
+      throw new \Exception('Monitor Instance: Add an identifier and environment in your settings.php. Check README.md');
     }
+
+    $this->project = $settings['project'];
+    $this->environment = $settings['environment'];
   }
 
   public function getData(): array {
