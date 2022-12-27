@@ -27,7 +27,7 @@ class DataCollector {
       'project' => $this->project,
       'environment' => $this->environment,
       'data' => [
-        'host' => \Drupal::request()->getHost(),
+        'host' => \Drupal::request()->getSchemeAndHttpHost(),
         'drupal' => [
           'version' => $this->getDrupalCoreVersion(),
         ],
@@ -39,6 +39,7 @@ class DataCollector {
           'headUrl' => $this->getGitHeadUrl(),
           'commit' => $this->getGitCommitId(),
           'commitUrl' => $this->getGitCommitUrl(),
+          'commitDate' => $this->getGitCommitDate()
         ],
         'node' => [
           'version' => $this->getNodeVersion(),
@@ -74,6 +75,10 @@ class DataCollector {
     return shell_exec('git rev-parse --short HEAD');
   }
 
+  private function getGitCommitDate(): string {
+    return shell_exec('git show -s --format=%cd --date="format:%d.%m.%Y" ' . $this->getGitCommitId());
+  }
+
   private function getGitUrl(): string|null {
     $remote = shell_exec('git config --get remote.origin.url');
 
@@ -83,7 +88,7 @@ class DataCollector {
     $host = $matches[2];
     $organization = $matches[4];
     $repository = $matches[5];
-    return "$host/$organization/$repository";
+    return "https://$host/$organization/$repository";
   }
 
   private function getDrupalCoreVersion(): string {
