@@ -13,7 +13,7 @@ Add the following lines to your settings.php file to enable functionality.
 ```php
 $settings['instance'] = [
   'project' => 'Instance',
-  'environment' => 'Live'
+  'environment' => 'Live',
   'monitor' => 'https://monitor.joinbox.com',
   'user' => 'monitor',
   'password' => 'monitor',
