@@ -34,10 +34,7 @@ class DataTransmitter {
     $this->password = $settings['password'];
 
     //create client
-    $this->client = new Client([
-      'base_uri' => $this->monitor,
-      'timeout'  => 300000,
-    ]);
+    $this->client = \Drupal::httpClient();
   }
 
   /**
@@ -48,7 +45,7 @@ class DataTransmitter {
    * @throws \GuzzleHttp\Exception\GuzzleException
    */
   public function transmit(array $data): bool {
-    $response = $this->client->request('POST', '/monitor/instance', [
+    $response = $this->client->request('POST', $this->monitor . '/monitor/instance', [
       'headers' => [
         'Content-Type' => 'application/json',
       ],
