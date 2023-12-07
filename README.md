@@ -19,3 +19,5 @@ $settings['instance'] = [
   'password' => 'monitor',
 ];
 ```
+
+Make sure the "shell_exec" PHP function is enabled on your server. (In cyon go to "Erweitert" -> "PHP-Einstellungen" and enable "shell_exec")
