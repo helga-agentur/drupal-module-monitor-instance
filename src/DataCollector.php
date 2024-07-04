@@ -45,7 +45,8 @@ class DataCollector {
         'node' => [
           'version' => $this->getNodeVersion(),
         ],
-        'timestamp' => time()
+        'npm' => $this->getOutdatedNPMPackages(),
+        'timestamp' => time(),
       ]
     ];
   }
@@ -111,5 +112,29 @@ class DataCollector {
 
   private function getNodeVersion(): string {
     return shell_exec('node -v');
+  }
+
+  private function getOutdatedNPMPackages(): array {
+    $json = shell_exec('cd themes/custom/customer; npm outdated --json');
+    $outdatedNPMPackages = json_decode($json, true);
+
+    $major = 0;
+    $minor = 0;
+    $patch = 0;
+
+    foreach ($outdatedNPMPackages as $package) {
+      $current = explode('.', $package['current']);
+      $latest = explode('.', $package['latest']);
+
+      if ($current[0] < $latest[0]) {
+        $major++;
+      } else if ($current[1] < $latest[1]) {
+        $minor++;
+      } else if ($current[2] < $latest[2]) {
+        $patch++;
+      }
+    }
+
+    return compact('major', 'minor', 'patch');
   }
 }
