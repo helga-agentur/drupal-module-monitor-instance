@@ -1,6 +1,6 @@
 name: instance
 type: module
 description: Send useful data to the monitor
-package: Joinbox
+package: Helga
 core: 8.x
 core_version_requirement: ^8 || ^9 || ^10 || ^11
