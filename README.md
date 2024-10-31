@@ -1,7 +1,7 @@
 # Monitor-Instance
-The Joinbox Monitoring tool consists of the following two parts.
-- [Monitor](https://github.com/joinbox/d9-module-monitor)
-- [Instance](https://github.com/joinbox/d9-module-monitor-instance)
+The Helga monitor tooling consists of the following two parts.
+- [Monitor](https://github.com/helga-agentur/drupal-module-monitor)
+- [Instance](https://github.com/helga-agentur/drupal-module-monitor-instance)
 
 When instance is enabled it sends data to the monitor as soon as the Drupal Cron hook is triggered.
 
@@ -14,7 +14,7 @@ Add the following lines to your settings.php file to enable functionality.
 $settings['instance'] = [
   'project' => 'Instance',
   'environment' => 'Live',
-  'monitor' => 'https://monitor.joinbox.com',
+  'monitor' => 'https://www.helga.ch',
   'user' => 'monitor',
   'password' => 'monitor',
 ];

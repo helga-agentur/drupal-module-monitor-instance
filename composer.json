@@ -1,12 +1,12 @@
 {
-    "name": "joinbox/monitor-instance",
+    "name": "helga/monitor-instance",
     "description": "The instance sends data to the monitor.",
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "sandu",
-            "email": "sandro@joinbox.com"
+            "email": "sandro@helga.ch"
         }
     ],
     "minimum-stability": "stable",
