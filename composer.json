@@ -1,5 +1,5 @@
 {
-    "name": "helga/monitor-instance",
+    "name": "helga-agentur/monitor-instance",
     "description": "The instance sends data to the monitor.",
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
