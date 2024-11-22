@@ -4,6 +4,7 @@ namespace Drupal\instance;
 
 use Drupal\Core\Site\Settings;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 class DataTransmitter {
 
@@ -14,6 +15,10 @@ class DataTransmitter {
   protected string $user;
 
   protected string $password;
+
+  private string $instanceEndpoint = '/monitor/instance';
+
+  private string $logEndpoint = '/monitor/log';
 
   /**
    * Constructs a new DataTransmitter
@@ -38,14 +43,34 @@ class DataTransmitter {
   }
 
   /**
+   * @param array $data
+   *
+   * @return bool
+   * @throws GuzzleException
+   */
+  public function transmitInstanceData(array $data): bool {
+    return $this->transmit($data, $this->instanceEndpoint);
+  }
+
+  /**
+   * @param array $data
+   *
+   * @return bool
+   * @throws GuzzleException
+   */
+  public function transmitLogData(array $data): bool {
+    return $this->transmit($data, $this->logEndpoint);
+  }
+
+  /**
    * Sends the data to monitor
    *
    * @param array $data
    * @return bool
-   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws GuzzleException
    */
-  public function transmit(array $data): bool {
-    $response = $this->client->request('POST', $this->monitor . '/monitor/instance', [
+  public function transmit(array $data, string $endpoint): bool {
+    $response = $this->client->request('POST', $this->monitor . $endpoint, [
       'headers' => [
         'Content-Type' => 'application/json',
       ],
