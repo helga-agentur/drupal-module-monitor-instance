@@ -25,8 +25,8 @@ class DataCollector {
 
   public function getData(): array {
     return [
-      'project' => $this->project,
-      'environment' => $this->environment,
+      'project' => $this->getProject(),
+      'environment' => $this->getEnvironment(),
       'data' => [
         'host' => \Drupal::request()->getSchemeAndHttpHost(),
         'drupal' => [
