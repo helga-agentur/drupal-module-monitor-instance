@@ -16,9 +16,9 @@ class DataTransmitter {
 
   protected string $password;
 
-  private string $instanceEndpoint = '/monitor/instance';
+  private string $instanceEndpoint = '/instance';
 
-  private string $logEndpoint = '/monitor/log';
+  private string $logEndpoint = '/log';
 
   /**
    * Constructs a new DataTransmitter
@@ -43,6 +43,9 @@ class DataTransmitter {
   }
 
   /**
+   * Sends instance environment data to the monitoring endpoint.
+   * Includes details like project, environment, Drupal/version, and system details.
+   *
    * @param array $data
    *
    * @return bool
@@ -53,6 +56,9 @@ class DataTransmitter {
   }
 
   /**
+   * Sends log event data to the monitoring endpoint.
+   * Covers project, environment, log level, message, and timestamp.
+   *
    * @param array $data
    *
    * @return bool
@@ -69,8 +75,8 @@ class DataTransmitter {
    * @return bool
    * @throws GuzzleException
    */
-  public function transmit(array $data, string $endpoint): bool {
-    $response = $this->client->request('POST', $this->monitor . $endpoint, [
+  private function transmit(array $data, string $endpoint): bool {
+    $response = $this->client->request('POST', $this->monitor . '/monitor' . $endpoint, [
       'headers' => [
         'Content-Type' => 'application/json',
       ],
