@@ -1,0 +1,10 @@
+services:
+  instance.data_collector:
+    class: Drupal\instance\DataCollector
+  instance.data_transmitter:
+    class: Drupal\instance\DataTransmitter
+  logger.instance_logger:
+    class: Drupal\instance\Logger\InstanceLogger
+    arguments: ['@instance.data_collector', '@instance.data_transmitter', '@logger.log_message_parser']
+    tags:
+      - { name: logger }
