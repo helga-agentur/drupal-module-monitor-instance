@@ -19,14 +19,14 @@ class DataCollector {
       throw new \Exception('Monitor Instance: Add an identifier and environment in your settings.php. Check README.md');
     }
 
-    $this->project = $settings['project'];
-    $this->environment = $settings['environment'];
+    $this->setProject($settings['project']);
+    $this->setEnvironment($settings['environment']);
   }
 
   public function getData(): array {
     return [
-      'project' => $this->project,
-      'environment' => $this->environment,
+      'project' => $this->getProject(),
+      'environment' => $this->getEnvironment(),
       'data' => [
         'host' => \Drupal::request()->getSchemeAndHttpHost(),
         'drupal' => [
@@ -49,6 +49,22 @@ class DataCollector {
         'timestamp' => time(),
       ]
     ];
+  }
+
+  private function setProject(string $project): void {
+    $this->project = $project;
+  }
+
+  private function setEnvironment(string $environment): void {
+    $this->environment = $environment;
+  }
+
+  public function getProject(): string {
+    return $this->project;
+  }
+
+  public function getEnvironment(): string {
+    return $this->environment;
   }
 
   private function getGitHead(): string {
