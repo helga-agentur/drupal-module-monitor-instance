@@ -33,6 +33,7 @@ final class InstanceLogger implements LoggerInterface {
   public function log($level, string|\Stringable $message, array $context = []): void {
     // Convert PSR3-style messages to \Drupal\Component\Render\FormattableMarkup
     // style, so they can be translated too.
+    $message = (string) $message;
     $placeholders = $this->parser->parseMessagePlaceholders($message, $context);
     // @see \Drupal\Core\Logger\LoggerChannel::log() for all available contexts.
     $renderedMessage = strtr($message, $placeholders);
