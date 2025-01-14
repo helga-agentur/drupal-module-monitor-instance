@@ -20,4 +20,8 @@ $settings['instance'] = [
 ];
 ```
 
+### Local Environment
+The config in settings.php is also required locally, although no logs are sent from there. (`'environment'` needs to be 'Local')
+
+## Deployment
 Make sure the "shell_exec" PHP function is enabled on your server. (In cyon go to "Erweitert" -> "PHP-Einstellungen" and enable "shell_exec")
