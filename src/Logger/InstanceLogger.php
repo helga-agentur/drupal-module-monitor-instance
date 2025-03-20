@@ -19,13 +19,14 @@ final class InstanceLogger implements LoggerInterface {
 
   use RfcLoggerTrait;
 
+  private DataTransmitter $dataTransmitter;
+
   /**
    * Constructs an InstanceLogger object.
    */
   public function __construct(
-    private readonly DataCollector $dataCollector,
-    private readonly DataTransmitter $dataTransmitter,
-    private readonly LogMessageParserInterface $parser,
+      private readonly DataCollector $dataCollector,
+      private readonly LogMessageParserInterface $parser,
   ) {}
 
   /**
@@ -43,20 +44,21 @@ final class InstanceLogger implements LoggerInterface {
     $renderedMessage = strtr($message, $placeholders);
 
     $logData = [
-      'project' => $this->dataCollector->getProject(),
-      'environment' => $this->dataCollector->getEnvironment(),
-      'data' => [
-        'type' => 'log',
-        'level' => $level,
-        'channel' => $context['channel'] ?? null,
-        'message' => $renderedMessage,
-        'timestamp' => time(),
-      ],
+        'project' => $this->dataCollector->getProject(),
+        'environment' => $this->dataCollector->getEnvironment(),
+        'data' => [
+            'type' => 'log',
+            'level' => $level,
+            'channel' => $context['channel'] ?? null,
+            'message' => $renderedMessage,
+            'timestamp' => time(),
+        ],
     ];
 
     // Transmit the log data.
     try {
-      $this->dataTransmitter->transmitLogData($logData);
+      $dataTransmitter = $this->getDataTransmitter();
+      $dataTransmitter->transmitLogData($logData);
     } catch (\Exception|GuzzleException $e) {
       /**
        * We do not do anything here at the moment, to prevent endless loops.
@@ -64,7 +66,17 @@ final class InstanceLogger implements LoggerInterface {
        *
        * In the near future we could gather the logs, trying to send them in intervals and stop after a few attempts.
        */
-      \Drupal::messenger()->addError($e->getMessage());
     }
+  }
+
+  /**
+   * Use a singleton
+   * @return DataTransmitter
+   */
+  private function getDataTransmitter() {
+    if (!isset($this->dataTransmitter)) {
+      $this->dataTransmitter = new DataTransmitter();
+    }
+    return $this->dataTransmitter;
   }
 }
