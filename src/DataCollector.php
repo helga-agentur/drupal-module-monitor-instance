@@ -131,7 +131,10 @@ class DataCollector {
   }
 
   private function getOutdatedNPMPackages(): array {
-    $json = shell_exec('cd themes/custom/customer; npm outdated --json');
+    /** @var ThemeHandlerInterface $themeHandler */
+    $themeHandler = \Drupal::service('theme_handler');
+    $themePath = $themeHandler->getTheme($themeHandler->getDefault())?->getPath();
+    $json = shell_exec("cd $themePath; npm outdated --json");
     $outdatedNPMPackages = json_decode($json, true);
 
     $major = 0;
