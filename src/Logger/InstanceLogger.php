@@ -9,6 +9,7 @@ use Drupal\Core\Logger\RfcLoggerTrait;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\instance\DataCollector;
 use Drupal\instance\DataTransmitter;
+use Drupal\instance\SendToMonitorFlag;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Log\LoggerInterface;
 
@@ -33,6 +34,7 @@ final class InstanceLogger implements LoggerInterface {
    * {@inheritdoc}
    */
   public function log($level, string|\Stringable $message, array $context = []): void {
+    if (array_key_exists(SendToMonitorFlag::SEND_TO_MONITOR_KEY->value, $context) && !$context[SendToMonitorFlag::SEND_TO_MONITOR_KEY->value]) return;
     //prevent instance from sending too much traffic, so we restrict it to error (3) or higher
     if($level > RfcLogLevel::ERROR) return;
 

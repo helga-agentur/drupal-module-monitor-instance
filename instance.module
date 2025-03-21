@@ -19,7 +19,5 @@ function instance_cron() {
     $dataTransmitter->transmitInstanceData($dataCollector->getData());
   } catch (Exception $e) {
     // do nothing here to prevent endless loops
-    // later we could discuss to send an E-Mail?
-    // we should not log anything, cause the log will trigger a new transmit(), which can fail again and again and again
   }
 }
