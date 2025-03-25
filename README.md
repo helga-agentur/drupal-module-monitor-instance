@@ -5,7 +5,7 @@ The Helga monitor tooling consists of the following two parts.
 
 When instance is enabled it sends:
 - Instance Data like Drupal Version, Git Repository, latest commit, branch etc. to the monitor as soon as the Drupal Cron hook is triggered.
-- Log Data with severity ERROR, CRITICAL, ALERT or EMERGENCY to the monitor
+- Log Data with severity ERROR, CRITICAL, ALERT or EMERGENCY to the monitor on Log-Event
 
 ## Activation
 Add the following lines to your settings.php file to enable functionality.
