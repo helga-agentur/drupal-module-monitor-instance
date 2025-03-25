@@ -77,11 +77,11 @@ class DataTransmitter {
    */
   private function transmit(array $data, string $endpoint): bool {
     $response = $this->client->request('POST', $this->monitor . '/monitor' . $endpoint, [
-      'headers' => [
-        'Content-Type' => 'application/json',
-      ],
-      'auth' => [$this->user, $this->password],
-      'body' => json_encode($data)
+        'headers' => [
+            'Content-Type' => 'application/json',
+        ],
+        'auth' => [$this->user, $this->password],
+        'body' => json_encode($data)
     ]);
 
     return $response->getStatusCode() == 201;

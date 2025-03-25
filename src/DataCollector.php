@@ -25,29 +25,29 @@ class DataCollector {
 
   public function getData(): array {
     return [
-      'project' => $this->getProject(),
-      'environment' => $this->getEnvironment(),
-      'data' => [
-        'host' => \Drupal::request()->getSchemeAndHttpHost(),
-        'drupal' => [
-          'version' => $this->getDrupalCoreVersion(),
-        ],
-        'php' => [
-          'version' => $this->getPHPVersion(),
-        ],
-        'git' => [
-          'head' => $this->getGitHead(),
-          'headUrl' => $this->getGitHeadUrl(),
-          'commit' => $this->getGitCommitId(),
-          'commitUrl' => $this->getGitCommitUrl(),
-          'commitDate' => $this->getGitCommitDate()
-        ],
-        'node' => [
-          'version' => $this->getNodeVersion(),
-        ],
-        'npm' => $this->getOutdatedNPMPackages(),
-        'timestamp' => time(),
-      ]
+        'project' => $this->getProject(),
+        'environment' => $this->getEnvironment(),
+        'data' => [
+            'host' => \Drupal::request()->getSchemeAndHttpHost(),
+            'drupal' => [
+                'version' => $this->getDrupalCoreVersion(),
+            ],
+            'php' => [
+                'version' => $this->getPHPVersion(),
+            ],
+            'git' => [
+                'head' => $this->getGitHead(),
+                'headUrl' => $this->getGitHeadUrl(),
+                'commit' => $this->getGitCommitId(),
+                'commitUrl' => $this->getGitCommitUrl(),
+                'commitDate' => $this->getGitCommitDate()
+            ],
+            'node' => [
+                'version' => $this->getNodeVersion(),
+            ],
+            'npm' => $this->getOutdatedNPMPackages(),
+            'timestamp' => time(),
+        ]
     ];
   }
 
@@ -89,7 +89,7 @@ class DataCollector {
     return $this->getGitUrl() . '/commit/' . $this->getGitCommitId();
   }
 
-  private function getGitCommitId(): string|null {
+  private function getGitCommitId(): string|null|false {
     return shell_exec('git rev-parse --short HEAD');
   }
 
@@ -102,7 +102,7 @@ class DataCollector {
    *
    * @return string
    */
-  private function getGitCommitDate(): string {
+  private function getGitCommitDate(): false|null|string {
     return shell_exec('git show -s --format=%cd --date=short ' . $this->getGitCommitId());
   }
 
@@ -110,6 +110,7 @@ class DataCollector {
     $remote = shell_exec('git config --get remote.origin.url');
 
     //if no origin detected, return null
+    if (!$remote) return null;
     if (!preg_match('/^(https?:\/\/|git@)(.+)(\/|:)(.+)\/(.+).git$/', $remote, $matches)) return null;
 
     $host = $matches[2];

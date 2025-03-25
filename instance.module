@@ -18,7 +18,6 @@ function instance_cron() {
     $dataTransmitter = new DataTransmitter();
     $dataTransmitter->transmitInstanceData($dataCollector->getData());
   } catch (Exception $e) {
-    \Drupal::messenger()->addError($e->getMessage());
-    \Drupal::logger('monitor')->error($e->getMessage());
+    // do nothing here to prevent endless loops
   }
 }
