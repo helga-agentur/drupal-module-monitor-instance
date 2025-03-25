@@ -34,6 +34,8 @@ final class InstanceLogger implements LoggerInterface {
    * {@inheritdoc}
    */
   public function log($level, string|\Stringable $message, array $context = []): void {
+    // check if logs should be sent to monitor
+    // we need to not send them to avoid endless loops. The monitor module has set the flag to false for its logs
     if (array_key_exists(SendToMonitorFlag::SEND_TO_MONITOR_KEY->value, $context) && !$context[SendToMonitorFlag::SEND_TO_MONITOR_KEY->value]) return;
     //prevent instance from sending too much traffic, so we restrict it to error (3) or higher
     if($level > RfcLogLevel::ERROR) return;
