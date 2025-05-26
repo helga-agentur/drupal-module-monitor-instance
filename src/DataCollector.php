@@ -128,14 +128,14 @@ class DataCollector {
   }
 
   private function getNodeVersion(): string {
-    return shell_exec('zsh -i -c \'node -v\'');
+    return shell_exec('bash -i -c \'node -v\'');
   }
 
   private function getOutdatedNPMPackages(): array {
     /** @var ThemeHandlerInterface $themeHandler */
     $themeHandler = \Drupal::service('theme_handler');
     $themePath = $themeHandler->getTheme($themeHandler->getDefault())?->getPath();
-    $json = shell_exec('cd $themePath; zsh -i -c \'npm outdated --json\'');
+    $json = shell_exec('cd $themePath; bash -i -c \'npm outdated --json\'');
     $outdatedNPMPackages = json_decode($json, true);
 
     $major = 0;
