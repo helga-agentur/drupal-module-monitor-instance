@@ -153,8 +153,8 @@ class DataCollector {
   /**
    * Returns the node version installed on the server, e.g. "v20.11.0".
    *
-   * Reads the default version of NVM or the headers of a system wide
-   * installation, as executing node is not possible without shell_exec.
+   * Reads the default version of NVM or the headers / version marker of the
+   * node installation found in the PATH, as executing node is not possible without shell_exec.
    *
    * @return string|null
    */
@@ -164,27 +164,73 @@ class DataCollector {
       if ($version !== null) return $version;
     }
 
-    foreach (['/usr/include/node', '/usr/local/include/node'] as $includeDir) {
-      $header = @is_readable($includeDir . '/node_version.h') ? @file_get_contents($includeDir . '/node_version.h') : false;
-      if ($header && preg_match_all('/#define NODE_(MAJOR|MINOR|PATCH)_VERSION (\d+)/', $header, $matches)) {
-        $parts = array_combine($matches[1], $matches[2]);
-        if (count($parts) === 3) {
-          return 'v' . $parts['MAJOR'] . '.' . $parts['MINOR'] . '.' . $parts['PATCH'];
-        }
-      }
+    //the binary is often a symlink, e.g. /usr/local/bin/node -> /opt/alt/alt-nodejs24/root/usr/bin/node
+    foreach ($this->getBinDirs() as $binDir) {
+      $node = realpath($binDir . '/node');
+      if (!$node) continue;
+
+      $prefix = dirname($node, 2);
+      $version = $this->readNodeVersionHeader($prefix . '/include/node/node_version.h')
+        ?? $this->readNodeVersionMarker($prefix . '/share/node');
+      if ($version !== null) return $version;
     }
 
     return null;
   }
 
-  private function getNvmDirs(): array {
+  /**
+   * Some packages (e.g. CloudLinux alt-nodejs on Cyon) ship no headers,
+   * but a marker file like share/node/node-version-24.13.0.
+   */
+  private function readNodeVersionMarker(string $directory): ?string {
+    $versions = [];
+    foreach (glob($directory . '/node-version-*') ?: [] as $file) {
+      if (preg_match('/node-version-(\d+\.\d+\.\d+)$/', $file, $matches)) {
+        $versions[] = $matches[1];
+      }
+    }
+    if (!$versions) return null;
+
+    usort($versions, fn($a, $b) => version_compare($b, $a));
+    return 'v' . $versions[0];
+  }
+
+  private function readNodeVersionHeader(string $path): ?string {
+    $header = @is_readable($path) ? @file_get_contents($path) : false;
+    if (!$header || !preg_match_all('/#define NODE_(MAJOR|MINOR|PATCH)_VERSION (\d+)/', $header, $matches)) return null;
+
+    $parts = array_combine($matches[1], $matches[2]);
+    if (count($parts) !== 3) return null;
+
+    return 'v' . $parts['MAJOR'] . '.' . $parts['MINOR'] . '.' . $parts['PATCH'];
+  }
+
+  /**
+   * Returns the directories a login shell would search for binaries.
+   */
+  private function getBinDirs(): array {
+    $binDirs = explode(PATH_SEPARATOR, (string) getenv('PATH'));
+    foreach ($this->getHomeDirs() as $home) {
+      $binDirs[] = $home . '/bin';
+      $binDirs[] = $home . '/.local/bin';
+    }
+    $binDirs[] = '/usr/local/bin';
+    $binDirs[] = '/usr/bin';
+
+    return array_unique(array_filter($binDirs));
+  }
+
+  private function getHomeDirs(): array {
     $homes = [getenv('HOME') ?: null];
     if (function_exists('posix_getpwuid') && function_exists('posix_geteuid')) {
       $homes[] = posix_getpwuid(posix_geteuid())['dir'] ?? null;
     }
+    return array_unique(array_filter($homes));
+  }
 
+  private function getNvmDirs(): array {
     $nvmDirs = [getenv('NVM_DIR') ?: null];
-    foreach (array_filter($homes) as $home) {
+    foreach ($this->getHomeDirs() as $home) {
       $nvmDirs[] = $home . '/.nvm';
     }
 
