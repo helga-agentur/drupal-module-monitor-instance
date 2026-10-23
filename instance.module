@@ -17,7 +17,7 @@ function instance_cron() {
     $dataCollector = new DataCollector();
     $dataTransmitter = new DataTransmitter();
     $dataTransmitter->transmitInstanceData($dataCollector->getData());
-  } catch (Exception $e) {
+  } catch (\Throwable $e) {
     // do nothing here to prevent endless loops
   }
 }
