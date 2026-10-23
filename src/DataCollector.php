@@ -153,8 +153,8 @@ class DataCollector {
   /**
    * Returns the node version installed on the server, e.g. "v20.11.0".
    *
-   * Reads the default version of NVM or the headers / version marker of the
-   * node installation found in the PATH, as executing node is not possible without shell_exec.
+   * Reads the default version of NVM or the version of the node installation
+   * found in the PATH (headers, version marker or the binary itself), as executing node is not possible without shell_exec.
    *
    * @return string|null
    */
@@ -171,11 +171,75 @@ class DataCollector {
 
       $prefix = dirname($node, 2);
       $version = $this->readNodeVersionHeader($prefix . '/include/node/node_version.h')
-        ?? $this->readNodeVersionMarker($prefix . '/share/node');
+        ?? $this->readNodeVersionMarker($prefix . '/share/node')
+        ?? $this->scanNodeBinaries($node, $prefix);
       if ($version !== null) return $version;
     }
 
     return null;
+  }
+
+  /**
+   * Fallback for installations without headers or marker: every node build
+   * contains the url of its headers (process.release.headersUrl),
+   * e.g. ".../release/v24.13.0/node-v24.13.0-headers.tar.gz".
+   *
+   * The binary is either self-contained or links a shared libnode. The result
+   * is cached until the file changes, as these files are around 100 MB.
+   */
+  private function scanNodeBinaries(string $node, string $prefix): ?string {
+    $files = array_merge(
+      [$node],
+      glob($prefix . '/lib/libnode*') ?: [],
+      glob($prefix . '/lib64/libnode*') ?: [],
+      glob('/usr/lib/*/libnode*') ?: [],
+    );
+
+    foreach (array_unique(array_filter(array_map('realpath', $files))) as $file) {
+      $stat = @stat($file);
+      if (!$stat) continue;
+
+      $cacheId = 'instance:node_version:' . hash('sha256', $file . ':' . $stat['size'] . ':' . $stat['mtime']);
+      $cache = \Drupal::cache()->get($cacheId);
+      if ($cache) {
+        if ($cache->data !== null) return $cache->data;
+        continue;
+      }
+
+      $version = $this->scanFile($file, '/node-v(\d+\.\d+\.\d+)-headers\.tar\.gz/');
+      $version = $version !== null ? 'v' . $version : null;
+      \Drupal::cache()->set($cacheId, $version);
+      if ($version !== null) return $version;
+    }
+
+    return null;
+  }
+
+  /**
+   * Searches a (binary) file chunk by chunk and returns the first match group.
+   */
+  private function scanFile(string $file, string $pattern): ?string {
+    $handle = @fopen($file, 'rb');
+    if (!$handle) return null;
+
+    $chunkSize = 1024 * 1024;
+    $overlap = 256;
+    $buffer = '';
+    $result = null;
+    while (!feof($handle)) {
+      $chunk = fread($handle, $chunkSize);
+      if ($chunk === false) break;
+      $buffer .= $chunk;
+      if (preg_match($pattern, $buffer, $matches)) {
+        $result = $matches[1];
+        break;
+      }
+      //keep the end of the buffer, the match could be split between two chunks
+      $buffer = substr($buffer, -$overlap);
+    }
+
+    fclose($handle);
+    return $result;
   }
 
   /**
@@ -239,7 +303,8 @@ class DataCollector {
 
   /**
    * Resolves the NVM default alias to an installed version.
-   * Falls back to the highest installed version.
+   * Falls back to the highest installed version. Returns null if the alias
+   * is "system", the node in the PATH is used then.
    */
   private function getNvmDefaultVersion(string $nvmDir): ?string {
     $installed = array_map('basename', glob($nvmDir . '/versions/node/v*', GLOB_ONLYDIR) ?: []);
@@ -253,6 +318,7 @@ class DataCollector {
       if (!@is_file($aliasFile)) break;
       $alias = trim((string) @file_get_contents($aliasFile));
     }
+    if ($alias === 'system') return null;
 
     $prefix = ltrim($alias, 'v');
     if (preg_match('/^\d+(\.\d+){0,2}$/', $prefix)) {

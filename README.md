@@ -28,5 +28,5 @@ The config in settings.php is also required locally, although no logs are sent f
 ## Deployment
 No shell access is needed (`shell_exec` can stay disabled):
 - Git information is read directly from the `.git` directory. The commit date is read from the commit object if it is stored loose, otherwise the date of the last checkout (reflog) is used. The source is appended to the date, e.g. `2025-08-19 (commit)` or `2026-10-23 (checkout)`.
-- The node version is taken from the NVM default alias (`~/.nvm`) or from the node binary found in the `PATH` (following symlinks to its installation and reading `include/node/node_version.h` or `share/node/node-version-*`).
+- The node version is taken from the NVM default alias (`~/.nvm`) or from the node binary found in the `PATH` (following symlinks to its installation and reading `include/node/node_version.h`, `share/node/node-version-*` or, as fallback, the version embedded in the binary/libnode, cached until it changes).
 - Outdated npm packages of the default theme are determined from its `package.json` and `node_modules`; the latest versions are fetched from registry.npmjs.org (cached for a day).
