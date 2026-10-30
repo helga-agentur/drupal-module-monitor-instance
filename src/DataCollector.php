@@ -40,7 +40,8 @@ class DataCollector {
                 'headUrl' => $this->getGitHeadUrl(),
                 'commit' => $this->getGitCommitId(),
                 'commitUrl' => $this->getGitCommitUrl(),
-                'commitDate' => $this->getGitCommitDate()
+                'commitDate' => $this->getGitCommitDate(),
+                'generatedAt' => $this->getGitGeneratedAt()
             ],
             'node' => [
                 'version' => $this->getNodeVersion(),
@@ -67,8 +68,26 @@ class DataCollector {
     return $this->environment;
   }
 
-  private function getGitHead(): string {
-    return shell_exec('git status | head -n 1');
+  private function getGitHead(): ?string {
+    return $this->getGitInfo('head');
+  }
+
+  /**
+   * Reads a value of the file written by the git hook (scripts/git-info.sh).
+   * Returns null if the file or the value is missing.
+   * The trailing line break matches the former shell_exec output.
+   */
+  private function getGitInfo(string $key): ?string {
+    static $info = null;
+
+    if ($info === null) {
+      $dir = DRUPAL_ROOT;
+      while (!is_dir($dir . '/.git') && $dir !== dirname($dir)) $dir = dirname($dir);
+      $json = @file_get_contents($dir . '/.git/instance-git-info.json');
+      $info = (is_string($json) ? json_decode($json, true) : null) ?: [];
+    }
+
+    return ($info[$key] ?? '') !== '' ? $info[$key] . "\n" : null;
   }
 
   /**
@@ -79,9 +98,9 @@ class DataCollector {
    */
   private function getGitHeadUrl(): string|null {
     //if head does not point to a version, return null
-    if(!preg_match('/HEAD detached at (.+)$/', $this->getGitHead())) return null;
+    if(!preg_match('/HEAD detached at (.+)$/', (string) $this->getGitHead())) return null;
 
-    $tag = shell_exec('git describe --tags --abbrev=0');
+    $tag = $this->getGitInfo('tag');
     return $this->getGitUrl() . '/releases/tag/' . $tag;
   }
 
@@ -89,8 +108,8 @@ class DataCollector {
     return $this->getGitUrl() . '/commit/' . $this->getGitCommitId();
   }
 
-  private function getGitCommitId(): string|null|false {
-    return shell_exec('git rev-parse --short HEAD');
+  private function getGitCommitId(): ?string {
+    return $this->getGitInfo('commit');
   }
 
   /**
@@ -102,12 +121,20 @@ class DataCollector {
    *
    * @return string
    */
-  private function getGitCommitDate(): false|null|string {
-    return shell_exec('git show -s --format=%cd --date=short ' . $this->getGitCommitId());
+  private function getGitCommitDate(): ?string {
+    return $this->getGitInfo('commitDate');
+  }
+
+  /**
+   * Returns when the hook last wrote the git file (ISO 8601, UTC).
+   */
+  private function getGitGeneratedAt(): ?string {
+    $value = $this->getGitInfo('generatedAt');
+    return $value === null ? null : trim($value);
   }
 
   private function getGitUrl(): string|null {
-    $remote = shell_exec('git config --get remote.origin.url');
+    $remote = $this->getGitInfo('remoteUrl');
 
     //if no origin detected, return null
     if (!$remote) return null;
