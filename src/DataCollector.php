@@ -67,7 +67,7 @@ class DataCollector {
     return $this->environment;
   }
 
-  private function getGitHead(): string {
+  private function getGitHead(): ?string {
     return shell_exec('git status | head -n 1');
   }
 
@@ -127,7 +127,7 @@ class DataCollector {
     return phpversion();
   }
 
-  private function getNodeVersion(): string {
+  private function getNodeVersion(): ?string {
     return shell_exec('bash -i -c \'node -v\'');
   }
 
