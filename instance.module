@@ -17,7 +17,9 @@ function instance_cron() {
     $dataCollector = new DataCollector();
     $dataTransmitter = new DataTransmitter();
     $dataTransmitter->transmitInstanceData($dataCollector->getData());
-  } catch (Exception $e) {
-    // do nothing here to prevent endless loops
+  } catch (\Throwable $e) {
+    // Never let the monitor break the host site (cron, requests, ...).
+    // Catch \Throwable, not only \Exception, so TypeErrors etc. are swallowed too.
+    // Do not log here to prevent endless loops.
   }
 }
